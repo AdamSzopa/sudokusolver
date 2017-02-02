@@ -137,9 +137,10 @@ pub fn solve(puzzle: &mut Vec<u32>)-> bool {
                               .skip((square_row*inner_square+square_col/inner_square)as usize)
                               .enumerate()
                               .filter(|&(i,_)|i%inner_square as usize==0)
-                              .map(|(_,v)| v.to_vec())
+                              .map(|(_,v)| v)
                               .take(inner_square as usize)
                               .flat_map(|x| x)
+                              .cloned()
                               .collect();
                 }
                 
