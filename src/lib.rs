@@ -82,15 +82,12 @@ mod tests {
 pub fn solve(puzzle: &mut Vec<u32>)-> bool {
 
     let max_value = f64::sqrt(puzzle.len() as f64) as u32;
-    //let mut debug_vec: Vec<u32> = vec![0u32;(max_value*max_value)as usize];
     if max_value * max_value != puzzle.len() as u32{
         return false;
     }
     
     let inner_square = f64::sqrt(max_value as f64) as u32;
     let check_inner_square =  {inner_square*inner_square == max_value};
-    
-     //if check_inner_square == true{ println!("Inner square will be check with value: {}",inner_square);}
     
     let mut fixed_map: Vec<bool> = Vec::with_capacity(puzzle.len());
     
@@ -109,9 +106,7 @@ pub fn solve(puzzle: &mut Vec<u32>)-> bool {
     let mut forward = true;
     
     while index < puzzle.len() as u32{
-     //println!("{:?}",puzzle);
         if fixed_map[index as usize] == false{
-            //puzzle[index as usize] += 1;
             if puzzle[index as usize]+1 > max_value{
                 if index == 0{
                     return false;
@@ -129,9 +124,7 @@ pub fn solve(puzzle: &mut Vec<u32>)-> bool {
                     let temp = index - index%inner_square;
                     let square = temp - ((temp/max_value)%inner_square) * max_value;
                     let square_row = square/max_value;
-                    let square_col = square%max_value;
-                    //let square_index = square_row + square_col/inner_square;
-                    
+                    let square_col = square%max_value;                    
                     
                     squares = puzzle.chunks(inner_square as usize)
                               .skip((square_row*inner_square+square_col/inner_square)as usize)
@@ -143,9 +136,6 @@ pub fn solve(puzzle: &mut Vec<u32>)-> bool {
                               .cloned()
                               .collect();
                 }
-                
-         //        println!("col: {}",col);
-         //       println!("row: {}",row);
                 
                 let cols = puzzle.iter().enumerate().filter(|&(i,_)| i as u32%max_value == col).map(|(_,v)| v).cloned().collect::<Vec<u32>>();
                 let candidate = puzzle[index as usize]+1;
@@ -168,8 +158,6 @@ pub fn solve(puzzle: &mut Vec<u32>)-> bool {
             index -= 1;
         }
     }
-    
-   //  println!("{:?}",debug_vec);
     
     true
 }
