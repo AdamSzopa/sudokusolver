@@ -156,12 +156,12 @@ pub fn solve_old(puzzle: &mut Vec<u32>) -> bool {
 
 pub fn solve(puzzle: &mut Vec<u32>) -> bool {
 
-    let max_value = f64::sqrt(puzzle.len() as f64) as usize;
-    if max_value * max_value != puzzle.len() {
+    let max_value = f64::sqrt(puzzle.len() as f64) as u32;
+    if max_value * max_value != puzzle.len() as u32 {
         return false;
     }
 
-    let inner_square = f64::sqrt(max_value as f64) as usize;
+    let inner_square = f64::sqrt(max_value as f64) as u32;
     let check_inner_square = {
         inner_square * inner_square == max_value
     };
@@ -178,16 +178,16 @@ pub fn solve(puzzle: &mut Vec<u32>) -> bool {
 
     }
 
-    let mut index: usize = 0;
+    let mut index: u32 = 0;
     let mut forward = true;
 
-    while index < puzzle.len() {
-        if fixed_map[index] == false {
-            if puzzle[index] as usize + 1 > max_value {
+    while index < puzzle.len() as u32 {
+        if fixed_map[index as usize] == false {
+            if puzzle[index as usize] + 1 > max_value {
                 if index == 0 {
                     return false;
                 }
-                puzzle[index] = 0;
+                puzzle[index as usize] = 0;
                 forward = false;
             } else {
 
@@ -195,42 +195,41 @@ pub fn solve(puzzle: &mut Vec<u32>) -> bool {
                 let col = index % max_value;
 
                 let cols = (0..max_value)
-                    .map(|x| puzzle[(col + x * max_value)])
+                    .map(|x| puzzle[(col + x * max_value) as usize])
                     .collect::<Vec<u32>>();
-
-                let candidate = puzzle[index] + 1;
-
-                if !(check_if_possible(&puzzle[(row * max_value)..(row * max_value + max_value)],
-                                       candidate) &&
-                     check_if_possible(&cols[..], candidate)) {
-                    puzzle[index] += 1;
+                let candidate = puzzle[index as usize] + 1;
+                if !(check_if_possible(&puzzle[(row*max_value) as usize ..(row*max_value+max_value) as usize],candidate) &&
+                    check_if_possible(&cols[..],candidate)
+                    )
+                {
+                    puzzle[index as usize] += 1;
                     continue;
                 }
 
-                let mut squares: Vec<u32> = Vec::new();
+                let mut squares: Vec<u32> = Vec::with_capacity(max_value as usize);
                 if check_inner_square {
                     let temp = index - index % inner_square;
                     let square = temp - ((temp / max_value) % inner_square) * max_value;
                     let square_row = square / max_value;
                     let square_col = square % max_value;
 
-                    squares = puzzle.chunks(inner_square)
-                        .skip((square_row * inner_square + square_col / inner_square))
+                    squares = puzzle.chunks(inner_square as usize)
+                        .skip((square_row * inner_square + square_col / inner_square) as usize)
                         .enumerate()
-                        .filter(|&(i, _)| i % inner_square == 0)
+                        .filter(|&(i, _)| i % inner_square as usize == 0)
                         .map(|(_, v)| v)
-                        .take(inner_square)
+                        .take(inner_square as usize)
                         .flat_map(|x| x)
                         .cloned()
                         .collect();
                 }
 
                 if !(!check_inner_square || check_if_possible(&squares[..], candidate)) {
-                    puzzle[index] += 1;
+                    puzzle[index as usize] += 1;
                     continue;
                 }
 
-                puzzle[index] += 1;
+                puzzle[index as usize] += 1;
                 forward = true;
             }
         }
@@ -243,6 +242,7 @@ pub fn solve(puzzle: &mut Vec<u32>) -> bool {
 
     true
 }
+
 
 pub fn check_if_possible(vec_in: &[u32], candidate: u32) -> bool {
     for i in vec_in {
