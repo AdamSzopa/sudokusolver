@@ -137,7 +137,7 @@ pub fn solve_old(puzzle: &mut Vec<u32>)-> bool {
                               .collect();
                 }
                 
-                let cols = puzzle.iter().enumerate().filter(|&(i,_)| i as u32%max_value == col).map(|(_,v)| v).cloned().collect::<Vec<u32>>();
+                let cols = (0..max_value).map(|x|puzzle[(col+x*max_value)as usize]).collect::<Vec<u32>>();
                 let candidate = puzzle[index as usize]+1;
                 if !(check_if_possible(&puzzle[(row*max_value) as usize ..(row*max_value+max_value) as usize],candidate) &&
                     check_if_possible(&cols[..],candidate) &&
@@ -202,6 +202,16 @@ pub fn solve(puzzle: &mut Vec<u32>)-> bool {
                 let row = index/max_value;
                 let col = index%max_value;
                 let mut squares: Vec<u32> = Vec::new();
+                
+                let cols = (0..max_value).map(|x|puzzle[(col+x*max_value)as usize]).collect::<Vec<u32>>();
+                let candidate = puzzle[index as usize]+1;
+                if !(check_if_possible(&puzzle[(row*max_value) as usize ..(row*max_value+max_value) as usize],candidate) &&
+                    check_if_possible(&cols[..],candidate)
+                    )
+                {
+                    puzzle[index as usize] += 1;
+                    continue;
+                }
 
                 if check_inner_square{
                     let temp = index - index%inner_square;
@@ -219,17 +229,12 @@ pub fn solve(puzzle: &mut Vec<u32>)-> bool {
                               .cloned()
                               .collect();
                 }
-                
-                let cols = (0..max_value).map(|x|puzzle[(col+x*max_value)as usize]).collect::<Vec<u32>>();
-                let candidate = puzzle[index as usize]+1;
-                if !(check_if_possible(&puzzle[(row*max_value) as usize ..(row*max_value+max_value) as usize],candidate) &&
-                    check_if_possible(&cols[..],candidate) &&
-                    (!check_inner_square || check_if_possible(&squares[..],candidate))
-                    )
-                {
+
+                if !(!check_inner_square || check_if_possible(&squares[..],candidate)){
                     puzzle[index as usize] += 1;
                     continue;
                 }
+
                 puzzle[index as usize] += 1;
                 forward = true;
             }
