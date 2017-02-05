@@ -210,18 +210,14 @@ pub fn solve(puzzle: &mut Vec<u32>) -> bool {
                 if check_inner_square {
                     let temp = index - index % inner_square;
                     let square = temp - ((temp / max_value) % inner_square) * max_value;
-                    let square_row = square / max_value;
-                    let square_col = square % max_value;
+                    let square_row = (square / max_value) / inner_square;
+                    let square_col = (square % max_value) / inner_square;
 
-                    squares = puzzle.chunks(inner_square as usize)
-                        .skip((square_row * inner_square + square_col / inner_square) as usize)
-                        .enumerate()
-                        .filter(|&(i, _)| i % inner_square as usize == 0)
-                        .map(|(_, v)| v)
-                        .take(inner_square as usize)
-                        .flat_map(|x| x)
-                        .cloned()
-                        .collect();
+                    for a in 0..inner_square {
+                        for b in 0..inner_square {
+                            squares.push(puzzle[((square_row*inner_square*max_value)+(inner_square*square_col)+b+(a*max_value))as usize]);
+                        }
+                    }
                 }
 
                 if !(!check_inner_square || check_if_possible(&squares[..], candidate)) {
