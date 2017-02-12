@@ -69,11 +69,11 @@ mod tests {
 
 }
 
-pub fn solve_old(puzzle: &mut Vec<u32>) -> bool {
+pub fn solve_old(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
 
     let max_value = f64::sqrt(puzzle.len() as f64) as u32;
     if max_value * max_value != puzzle.len() as u32 {
-        return false;
+        return Err("Not a square".to_owned());
     }
 
     let inner_square = f64::sqrt(max_value as f64) as u32;
@@ -101,7 +101,7 @@ pub fn solve_old(puzzle: &mut Vec<u32>) -> bool {
             puzzle[index as usize] += 1;
             if puzzle[index as usize] > max_value {
                 if index == 0 {
-                    return false;
+                    return Err("No solution.".to_owned());
                 }
                 puzzle[index as usize] = 0;
                 forward = false;
@@ -151,12 +151,12 @@ pub fn solve_old(puzzle: &mut Vec<u32>) -> bool {
             if index > 0 {
                 index -= 1;
             } else {
-                return false;
+                return Err("No solution.".to_owned());
             }
         }
     }
 
-    true
+    Ok(puzzle.clone())
 }
 
 pub fn solve(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
@@ -173,11 +173,7 @@ pub fn solve(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
         inner_square * inner_square == max_value
     };
 
-
-    let mut reversed_puzzle = puzzle.clone();
-    reversed_puzzle.reverse();
     let mut fixed_map: Vec<bool> = Vec::with_capacity(puzzle.len());
-
 
     for element in puzzle.iter() {
         if *element == 0 {
@@ -188,6 +184,8 @@ pub fn solve(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
 
     }
 
+    let mut reversed_puzzle = puzzle.clone();
+    reversed_puzzle.reverse();
     let mut fixed_map_reverse = fixed_map.clone();
     fixed_map_reverse.reverse();
 
@@ -208,8 +206,8 @@ pub fn solve(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
         
         let (ref mut puzzle, ref mut fixed_map, ref mut anwser) = *data.lock().unwrap();
         
-    let mut index: u32 = 0;
-    let mut forward = true;
+        let mut index: u32 = 0;
+        let mut forward = true;
     
         while index < puzzle.len() as u32 {
             if !cont.load(Ordering::SeqCst) {
