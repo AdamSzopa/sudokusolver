@@ -228,12 +228,10 @@ pub fn solve_single_thread(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
         }
         if forward {
             index += 1;
+        } else if index > 0 {
+            index -= 1;
         } else {
-            if index > 0 {
-                index -= 1;
-            } else {
-                return Err("No solution.".to_owned());
-            }
+            return Err("No solution.".to_owned());
         }
     }
 
@@ -256,7 +254,7 @@ pub fn solve_threads_std(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
 
     let mut fixed_map: Vec<bool> = Vec::with_capacity(puzzle.len());
 
-    for element in puzzle.iter() {
+    for element in &puzzle {
         if *element == 0 {
             fixed_map.push(false);
         } else {
@@ -280,8 +278,8 @@ pub fn solve_threads_std(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
     let cont = Arc::new(AtomicBool::new(true));
 
     let mut threads = Vec::new();
-    for i in 0..jobs.len() {
-        let data = jobs[i].clone();
+    for i in &jobs {
+        let data = i.clone();
         let cont = cont.clone();
         threads.push(thread::spawn(move || {
         
@@ -341,13 +339,12 @@ pub fn solve_threads_std(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
             }
             if forward {
                 index += 1;
-            } else {
-                if index > 0 {
+            } else if index > 0 {
                     index -= 1;
                 } else {
                     return;
                 }
-            }
+            
         }
         *anwser = true;
         cont.store(false, Ordering::SeqCst);
@@ -358,7 +355,7 @@ pub fn solve_threads_std(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
         t.join().unwrap();
     }
 
-    for i in jobs.iter() {
+    for i in &jobs {
         if i.lock().unwrap().2 {
 
             return Ok(i.lock().unwrap().0.clone());
@@ -468,13 +465,11 @@ pub fn solve_threads_cross(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
                 }
                 if forward {
                     index += 1;
-                } else {
-                    if index > 0 {
+                } else if index > 0 {
                         index -= 1;
                     } else {
                         return;
                     }
-                }
             }
             *anwser = true;
             cont.store(false, Ordering::SeqCst);
@@ -482,7 +477,7 @@ pub fn solve_threads_cross(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
         }
     });
 
-    for i in jobs.iter() {
+    for i in &jobs {
         if i.2 {
 
             return Ok(i.0.clone());
