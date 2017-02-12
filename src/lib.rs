@@ -1,6 +1,7 @@
 use std::thread;
 use std::sync::{Arc, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
+extern crate crossbeam;
 
 #[cfg(test)]
 mod tests {
@@ -10,37 +11,108 @@ mod tests {
     #[test]
     fn solve_test_positive() {
         let mut vec = vec![0u32;4];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
         vec = vec![0u32;9];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
         vec = vec![0u32;81];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
         vec = vec![0u32, 1, 0, 0];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
         vec = vec![1u32, 2, 0, 0];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
         vec = vec![1u32, 2, 0, 1];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
         vec = vec![0u32, 1, 0, 2, 0, 1, 0, 2, 0];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
         vec = vec![0u32, 0, 0, 0, 0, 1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 0];
-        assert!(solve(&vec).is_ok());
+        assert!(solve_single_thread(&mut vec).is_ok());
+    }
+    #[test]
+    fn solve_test_positive_cross() {
+        let mut vec = vec![0u32;4];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+        vec = vec![0u32;9];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+        vec = vec![0u32;81];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+        vec = vec![0u32, 1, 0, 0];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+        vec = vec![1u32, 2, 0, 0];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+        vec = vec![1u32, 2, 0, 1];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+        vec = vec![0u32, 1, 0, 2, 0, 1, 0, 2, 0];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+        vec = vec![0u32, 0, 0, 0, 0, 1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 0];
+        assert!(solve_threads_cross(&mut vec).is_ok());
+    }
+
+    #[test]
+    fn solve_test_positive_threads() {
+        let mut vec = vec![0u32;4];
+        assert!(solve_threads_std(&vec).is_ok());
+        vec = vec![0u32;9];
+        assert!(solve_threads_std(&vec).is_ok());
+        vec = vec![0u32;81];
+        assert!(solve_threads_std(&vec).is_ok());
+        vec = vec![0u32, 1, 0, 0];
+        assert!(solve_threads_std(&vec).is_ok());
+        vec = vec![1u32, 2, 0, 0];
+        assert!(solve_threads_std(&vec).is_ok());
+        vec = vec![1u32, 2, 0, 1];
+        assert!(solve_threads_std(&vec).is_ok());
+        vec = vec![0u32, 1, 0, 2, 0, 1, 0, 2, 0];
+        assert!(solve_threads_std(&vec).is_ok());
+        vec = vec![0u32, 0, 0, 0, 0, 1, 2, 0, 0, 3, 4, 0, 0, 0, 0, 0];
+        assert!(solve_threads_std(&vec).is_ok());
     }
 
     #[test]
     fn solve_test_negative() {
         let mut vec = vec![0u32, 1, 1, 0, 0, 0, 0, 0, 0];
-        assert!(solve(&vec).is_err());
+        assert!(solve_single_thread(&mut vec).is_err());
         vec = vec![0u32, 1, 0, 0, 0, 0, 0, 1, 0];
-        assert!(solve(&vec).is_err());
+        assert!(solve_single_thread(&mut vec).is_err());
         vec = vec![0u32, 0, 0, 2, 0, 2, 0, 0, 0];
-        assert!(solve(&vec).is_err());
+        assert!(solve_single_thread(&mut vec).is_err());
         vec = vec![0u32;8];
-        assert!(solve(&vec).is_err());
+        assert!(solve_single_thread(&mut vec).is_err());
         vec = vec![0u32, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0];
-        assert!(solve(&vec).is_err());
+        assert!(solve_single_thread(&mut vec).is_err());
         vec = vec![0u32, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 4];
-        assert!(solve(&vec).is_err());
+        assert!(solve_single_thread(&mut vec).is_err());
+    }
+
+    #[test]
+    fn solve_test_negative_threads() {
+        let mut vec = vec![0u32, 1, 1, 0, 0, 0, 0, 0, 0];
+        assert!(solve_threads_std(&vec).is_err());
+        vec = vec![0u32, 1, 0, 0, 0, 0, 0, 1, 0];
+        assert!(solve_threads_std(&vec).is_err());
+        vec = vec![0u32, 0, 0, 2, 0, 2, 0, 0, 0];
+        assert!(solve_threads_std(&vec).is_err());
+        vec = vec![0u32;8];
+        assert!(solve_threads_std(&vec).is_err());
+        vec = vec![0u32, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0];
+        assert!(solve_threads_std(&vec).is_err());
+        vec = vec![0u32, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 4];
+        assert!(solve_threads_std(&vec).is_err());
+    }
+
+    #[test]
+    fn solve_test_negative_cross() {
+        let mut vec = vec![0u32, 1, 1, 0, 0, 0, 0, 0, 0];
+        assert!(solve_threads_cross(&mut vec).is_err());
+        vec = vec![0u32, 1, 0, 0, 0, 0, 0, 1, 0];
+        assert!(solve_threads_cross(&mut vec).is_err());
+        vec = vec![0u32, 0, 0, 2, 0, 2, 0, 0, 0];
+        assert!(solve_threads_cross(&mut vec).is_err());
+        vec = vec![0u32;8];
+        assert!(solve_threads_cross(&mut vec).is_err());
+        vec = vec![0u32, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0];
+        assert!(solve_threads_cross(&mut vec).is_err());
+        vec = vec![0u32, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 4];
+        assert!(solve_threads_cross(&mut vec).is_err());
     }
 
     #[test]
@@ -58,18 +130,27 @@ mod tests {
 
     #[test]
     // #[ignore]
-    fn hard_to_bruteforce() {
+    fn hard_to_bruteforce_std() {
         let test = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 8, 5, 0, 0, 1, 0, 2, 0, 0,
                         0, 0, 0, 0, 0, 5, 0, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0, 9, 0, 0, 0,
                         0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 7, 3, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0,
                         0, 4, 0, 0, 0, 9];
-        assert!(solve(&test).is_ok());
+        assert!(solve_threads_std(&test).is_ok());
+    }
+    #[test]
+    // #[ignore]
+    fn hard_to_bruteforce_cross() {
+        let mut test = vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 8, 5, 0, 0, 1, 0, 2,
+                            0, 0, 0, 0, 0, 0, 0, 5, 0, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 0,
+                            9, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 7, 3, 0, 0, 2, 0, 1, 0,
+                            0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 9];
+        assert!(solve_threads_cross(&mut test).is_ok());
     }
 
 
 }
 
-pub fn solve_old(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
+pub fn solve_single_thread(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
 
     let max_value = f64::sqrt(puzzle.len() as f64) as u32;
     if max_value * max_value != puzzle.len() as u32 {
@@ -159,7 +240,7 @@ pub fn solve_old(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
     Ok(puzzle.clone())
 }
 
-pub fn solve(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
+pub fn solve_threads_std(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
 
     let puzzle = puzzle_in.clone();
 
@@ -281,6 +362,130 @@ pub fn solve(puzzle_in: &Vec<u32>) -> Result<Vec<u32>, String> {
         if i.lock().unwrap().2 {
 
             return Ok(i.lock().unwrap().0.clone());
+        }
+    }
+
+    Err("No solution.".to_owned())
+}
+
+pub fn solve_threads_cross(puzzle: &mut Vec<u32>) -> Result<Vec<u32>, String> {
+
+    // let puzzle = puzzle_in.clone();
+
+    let max_value = f64::sqrt(puzzle.len() as f64) as u32;
+    if max_value * max_value != puzzle.len() as u32 {
+        return Err("Not a square".to_owned());
+    }
+
+    let inner_square = f64::sqrt(max_value as f64) as u32;
+    let check_inner_square = {
+        inner_square * inner_square == max_value
+    };
+
+    let mut fixed_map: Vec<bool> = Vec::with_capacity(puzzle.len());
+
+    for element in puzzle.iter() {
+        if *element == 0 {
+            fixed_map.push(false);
+        } else {
+            fixed_map.push(true);
+        };
+
+    }
+
+    let mut reversed_puzzle = puzzle.clone();
+    reversed_puzzle.reverse();
+    let mut fixed_map_reverse = fixed_map.clone();
+    fixed_map_reverse.reverse();
+
+    let anwser = false;
+    let anwser_reverse = false;
+
+    let mut jobs = Vec::new();
+    jobs.push((puzzle, fixed_map, anwser));
+    jobs.push((&mut reversed_puzzle, fixed_map_reverse, anwser_reverse));
+
+    let cont = Arc::new(AtomicBool::new(true));
+
+    crossbeam::scope(|scope| {
+        for i in &mut jobs {
+            let cont = cont.clone();
+
+            scope.spawn(move || {
+
+            let (ref mut puzzle, ref mut fixed_map, ref mut anwser) = *i;
+
+            let mut index: u32 = 0;
+            let mut forward = true;
+            while index < puzzle.len() as u32 {
+                if !cont.load(Ordering::SeqCst) {
+                    return;
+                }
+                if !fixed_map[index as usize] {
+                    puzzle[index as usize] += 1;
+                    if puzzle[index as usize] > max_value {
+                        if index == 0 {
+                            return;
+                        }
+                        puzzle[index as usize] = 0;
+                        forward = false;
+                    } else {
+
+                        let row = index / max_value;
+                        let col = index % max_value;
+
+                        let cols = (0..max_value)
+                            .map(|x| puzzle[(col + x * max_value) as usize])
+                            .collect::<Vec<u32>>();
+                        let candidate = puzzle[index as usize];
+                        if !(check_if_possible(&puzzle[(row*max_value) as usize ..(row*max_value+max_value) as usize],candidate) &&
+                        check_if_possible(&cols[..],candidate)
+                        )
+                    {
+                        continue;
+                    }
+
+                        let mut squares: Vec<u32> = Vec::with_capacity(max_value as usize);
+                        if check_inner_square {
+                            let temp = index - index % inner_square;
+                            let square = temp - ((temp / max_value) % inner_square) * max_value;
+                            let square_row = (square / max_value) / inner_square;
+                            let square_col = (square % max_value) / inner_square;
+
+                            for a in 0..inner_square {
+                                for b in 0..inner_square {
+                                    squares.push(puzzle[((square_row*inner_square*max_value)+(inner_square*square_col)+b+(a*max_value))as usize]);
+                                }
+                            }
+                        }
+
+                        if !(!check_inner_square || check_if_possible(&squares[..], candidate)) {
+                            continue;
+                        }
+
+                        forward = true;
+                    }
+                }
+                if forward {
+                    index += 1;
+                } else {
+                    if index > 0 {
+                        index -= 1;
+                    } else {
+                        return;
+                    }
+                }
+            }
+            *anwser = true;
+            cont.store(false, Ordering::SeqCst);
+        });
+        }
+    });
+
+    for i in jobs.iter() {
+        if i.2 {
+
+            return Ok(i.0.clone());
         }
     }
 

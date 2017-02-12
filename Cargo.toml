@@ -5,6 +5,7 @@ authors = ["Adam Szopa <adam@szopa.org.pl>"]
 
 [dependencies]
 bencher = "0.1.2"
+crossbeam = "0.2"
 
 [[bench]]
 name = "bench"
