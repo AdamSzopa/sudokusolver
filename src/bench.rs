@@ -6,8 +6,8 @@ use bencher::Bencher;
 use sudokusolver::*;
 
 fn solve_simple_cross(bench: &mut Bencher) {
-    let mut vec = vec![0u32;81];
-    bench.iter(|| solve_threads_cross(&mut vec))
+    // let mut vec = vec![0u32;81];
+    bench.iter(|| solve_threads_cross(&mut vec![0u32;81]))
 }
 
 fn solve_simple_threads(bench: &mut Bencher) {
@@ -16,16 +16,22 @@ fn solve_simple_threads(bench: &mut Bencher) {
 }
 
 fn solve_simple(bench: &mut Bencher) {
-    let mut vec = vec![0u32;81];
-    bench.iter(|| solve_single_thread(&mut vec))
+    // let mut vec = vec![0u32;81];
+    bench.iter(|| solve_single_thread(&mut vec![0u32;81]))
 }
 
 fn solve_normal_cross(bench: &mut Bencher) {
-    let mut test = vec![0, 0, 7, 0, 2, 0, 0, 0, 3, 8, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 6, 0, 1, 5, 8, 0, 0, 0, 0, 3, 0, 0, 6, 0, 0, 0, 1, 7, 0, 0, 0, 0,
-                        9, 0, 0, 0, 2, 9, 0, 0, 0, 6, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                        0, 3, 0, 8, 0, 7];
-    bench.iter(|| solve_threads_cross(&mut test))
+    // let mut test = vec![0, 0, 7, 0, 2, 0, 0, 0, 3, 8, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 0, 0, 6, 0, 1, 5, 8, 0, 0, 0, 0, 3, 0, 0, 6, 0, 0, 0, 1, 7, 0, 0, 0, 0,
+    // 9, 0, 0, 0, 2, 9, 0, 0, 0, 6, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 3, 0, 8, 0, 7];
+    bench.iter(|| {
+        solve_threads_cross(&mut vec![0, 0, 7, 0, 2, 0, 0, 0, 3, 8, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0,
+                                      0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 1, 5, 8, 0, 0, 0, 0, 3, 0, 0,
+                                      6, 0, 0, 0, 1, 7, 0, 0, 0, 0, 9, 0, 0, 0, 2, 9, 0, 0, 0, 6,
+                                      0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 8, 0,
+                                      7])
+    })
 }
 
 fn solve_normal_threads(bench: &mut Bencher) {
@@ -37,11 +43,17 @@ fn solve_normal_threads(bench: &mut Bencher) {
 }
 
 fn solve_normal(bench: &mut Bencher) {
-    let mut test = vec![0, 0, 7, 0, 2, 0, 0, 0, 3, 8, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 6, 0, 1, 5, 8, 0, 0, 0, 0, 3, 0, 0, 6, 0, 0, 0, 1, 7, 0, 0, 0, 0,
-                        9, 0, 0, 0, 2, 9, 0, 0, 0, 6, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-                        0, 3, 0, 8, 0, 7];
-    bench.iter(|| solve_single_thread(&mut test))
+    // let mut test = vec![0, 0, 7, 0, 2, 0, 0, 0, 3, 8, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 0, 0, 6, 0, 1, 5, 8, 0, 0, 0, 0, 3, 0, 0, 6, 0, 0, 0, 1, 7, 0, 0, 0, 0,
+    // 9, 0, 0, 0, 2, 9, 0, 0, 0, 6, 0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    // 0, 3, 0, 8, 0, 7];
+    bench.iter(|| {
+        solve_single_thread(&mut vec![0, 0, 7, 0, 2, 0, 0, 0, 3, 8, 0, 5, 0, 0, 0, 0, 6, 0, 0, 0,
+                                      0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 1, 5, 8, 0, 0, 0, 0, 3, 0, 0,
+                                      6, 0, 0, 0, 1, 7, 0, 0, 0, 0, 9, 0, 0, 0, 2, 9, 0, 0, 0, 6,
+                                      0, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 8, 0,
+                                      7])
+    })
 }
 
 benchmark_group!(solve_bench, solve_simple, solve_normal);
